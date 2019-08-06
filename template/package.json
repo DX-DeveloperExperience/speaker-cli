@@ -1,0 +1,27 @@
+{
+	"name": "{{project-name}}",
+	"version": "1.0.0",
+	"description": "{{project-description}}",
+	"directories": {
+		"doc": "docs"
+	},
+	"scripts": {
+		"start": "npm run generate:slides",
+		"generate:slides": "speaker-cli generate --slides",
+		"watch:slides": "speaker-cli generate --slides --watch"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/T3kstiil3/vue-hack-in-the-wood-2019.git"
+	},
+	"author": "",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/T3kstiil3/vue-hack-in-the-wood-2019/issues"
+	},
+	"homepage": "https://github.com/T3kstiil3/vue-hack-in-the-wood-2019",
+	"devDependencies": {
+		"speaker-cli": "^1.0.0"
+	},
+	"dependencies": {}
+}

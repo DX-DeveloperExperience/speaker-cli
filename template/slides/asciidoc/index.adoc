@@ -1,0 +1,36 @@
+:revealjsdir: https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.7.0
+:revnumber: {project-version}
+:example-caption!:
+ifndef::imagesdir[:imagesdir: images]
+:docinfo: shared
+:navigation:
+:menu:
+:header_footer: true
+:status:
+:slideNumber: true
+:showSlideNumber: true
+:title-slide-background-image: ./../../img/bg.jpeg
+:title-slide-transition: zoom
+:title-slide-transition-speed: fast
+:icons: font
+
+= Vue.js
+
+image::./../../img/logo.png[Logo,200]
+
+👨🏻‍💻 🌲 Hack in the wood 2019
+ +
+ +
+Le framework évolutif pour construire des interfaces utilisateur rapidement. +
+Conçu et pensé pour être adopté de manière incrémentale.
+
+== Qui sommes nous ?
+
+=== Emmanuel DEMEY
+
+=== Aurélien LOYER
+
+include::chapters/introduction.adoc[]
+include::chapters/andmore.adoc[]
+
+ 

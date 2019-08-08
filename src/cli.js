@@ -81,7 +81,7 @@ module.exports = class Cli {
 					);
 				}
 				
-				require('../lib/create')(name, options);
+				require('../commands/create')(name, options);
 			});
 
 		this.program.commands.forEach(c => c.on('--help', () => console.log()));

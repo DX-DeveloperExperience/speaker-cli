@@ -27,9 +27,9 @@
 		"didyoumean": "^1.2.1",
 		"esm": "^3.2.25",
 		"fs-extra": "^8.1.0",
+		"inquirer": "^6.5.1",
 		"minimist": "^1.2.0",
 		"ncp": "^2.0.0",
-		"readline-sync": "^1.4.10",
 		"rimraf": "^2.6.3",
 		"semver": "^6.3.0"
 	},

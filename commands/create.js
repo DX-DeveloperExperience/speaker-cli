@@ -19,6 +19,7 @@ async function create(directoryName, projectOptions) {
 			type: 'confirm',
 			message: `Generate project in current directory?`,
 		});
+
 		if (!isCurrentOk) {
 			return;
 		}
@@ -32,6 +33,7 @@ async function create(directoryName, projectOptions) {
 				type: 'confirm',
 				message: `Remove this directory and create the project?`,
 			});
+
 			if (removeExisting === true) {
 				rimraf.sync(directoryName);
 			} else {
@@ -45,9 +47,10 @@ async function create(directoryName, projectOptions) {
 
 	fs.mkdir(directoryName);
 
+	console.log(JSON.stringify(options));
 	// store config into .spearker
 	await writeFileTree(`${directoryName}`, {
-		'.speaker': JSON.stringify(options),
+		'.speaker.json': JSON.stringify(options),
 	});
 
 	// generate project from template

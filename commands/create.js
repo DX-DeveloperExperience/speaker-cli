@@ -1,6 +1,5 @@
 const fs = require('fs-extra');
 const util = require('util');
-const ora = require('ora');
 const inquirer = require('inquirer');
 const rimraf = require('rimraf');
 const glob = require('glob');
@@ -8,11 +7,10 @@ const Mustache = require('mustache');
 const ncp = require('ncp').ncp;
 const ncpPromise = util.promisify(ncp);
 const homedir = require('os').homedir();
-const spawnSync = require('child_process').spawnSync;
+const execSync = require('child_process').execSync;
 
 const logging = require('../utils/logging');
 const writeFileTree = require('../utils/writeFileTree');
-let spinner;
 
 async function create(directoryName, projectOptions) {
 	// TODO read options and use default or distant template like git repo ...
@@ -73,11 +71,13 @@ async function create(directoryName, projectOptions) {
 		config = await getProjectOptions({ directoryName });
 	}
 
+	const start = new Date();
+
 	fs.mkdir(directoryName);
 
 	// store config into .spearker
 	await writeFileTree(`${directoryName}`, {
-		'.speaker.json': JSON.stringify(config),
+		'.speaker.json': JSON.stringify(config, null, 4),
 	});
 
 	// generate project from template
@@ -91,13 +91,13 @@ async function create(directoryName, projectOptions) {
 
 	process.chdir(directoryName);
 
-	// search all files with template to replace
-	const filesPath = glob.sync('./**/*.mustache', {});
-
 	const specialConfig = {
 		...config,
 		authors: config.projectAuthorsTwitter.split(' '),
 	};
+
+	// search all files with template to replace
+	const filesPath = glob.sync('./**/*.mustache', {});
 
 	// loop files and replace template
 	filesPath.forEach(filePath => {
@@ -108,14 +108,11 @@ async function create(directoryName, projectOptions) {
 		fs.renameSync(filePath, filePathWithoutMustache);
 	});
 
-	// go to project and install dependencies
-	spawnSync('cd', [directoryName]);
-	spinner = ora({ text: 'Installing dependencies', color: 'yellow' });
-	spinner.start();
-	spawnSync('npm', ['i', '--silent']);
-	spinner.stop();
-
-	// log commands to start
+	const end = new Date() - start;
+	logging(undefined, '🎉 Successfully generated', `Execution time: ${end}ms`);
+	console.info(`Next commands: `)
+	console.info(`cd ${directoryName}`);
+	console.info(`npm install`);
 }
 
 async function getProjectOptions(options) {
@@ -162,7 +159,7 @@ async function getProjectOptions(options) {
 	});
 	if (saveConfig === true) {
 		await writeFileTree(`${homedir}`, {
-			'.speaker.json': JSON.stringify(config),
+			'.speaker.json': JSON.stringify(config, null, 4),
 		});
 	}
 

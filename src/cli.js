@@ -1,15 +1,14 @@
 'use strict';
 
 const program = require('commander');
-const minimist = require('minimist')
-const path = require('path');
+const minimist = require('minimist');
 const chalk = require('chalk');
 const semver = require('semver');
 const requiredVersion = require('../package.json').engines.node;
 const didYouMean = require('didyoumean');
 
 // setting edit distance to 60% of the input string's length
-didYouMean.threshold = 0.6
+didYouMean.threshold = 0.6;
 
 module.exports = class Cli {
 	constructor() {
@@ -80,7 +79,24 @@ module.exports = class Cli {
 						)
 					);
 				}
-				
+
+				require('../commands/create')(name, options);
+			});
+
+		program
+			.command('generate')
+			.description('generate file to deploy')
+			.action((name, cmd) => {
+				const options = cleanArgs(cmd);
+
+				if (minimist(process.argv.slice(3))._.length > 1) {
+					console.log(
+						chalk.yellow(
+							"\n Info: You provided more than one argument. The first one will be used as the app's name, the rest are ignored."
+						)
+					);
+				}
+
 				require('../commands/create')(name, options);
 			});
 
@@ -112,7 +128,7 @@ function cleanArgs(cmd) {
 	const args = {};
 	cmd.options.forEach(o => {
 		const key = camelize(o.long.replace(/^--/, ''));
-		
+
 		if (typeof cmd[key] !== 'function' && typeof cmd[key] !== 'undefined') {
 			args[key] = cmd[key];
 		}

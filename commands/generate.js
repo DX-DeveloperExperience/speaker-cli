@@ -7,6 +7,8 @@ const chokidar = require('chokidar');
 const ncpPromise = util.promisify(ncp);
 const args = process.argv.slice(2);
 
+const path = require('path');
+
 // Configuration
 const isWatching = args.includes('watch');
 const directoryToWatch = 'slides';
@@ -18,6 +20,27 @@ const serverParams = {
 	open: true,
 	logLevel: 0,
 };
+
+async function generate(...args) {
+	const appDir = path.dirname(require.main.filename);
+
+	console.log(args);
+
+	if (fs.existsSync(`${appDir}/.speaker.json`)) {
+		console.log('okkkkk');
+	} else {
+		console.log('nnnnokkkkk');
+	}
+}
+
+module.exports = (...args) => {
+	return generate(...args).catch(err => {
+		console.error(`⚠️ : `, err);
+		process.exit(1);
+	});
+};
+
+return;
 
 if (isWatching) {
 	chokidar

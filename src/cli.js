@@ -85,11 +85,14 @@ module.exports = class Cli {
 
 		program
 			.command('generate')
+			.option('-s, --slides', 'generate slides part')
+			.option('-c, --codelab', 'generate codelab part')
+			.option('-w, --watch', 'watch all files and re-run generate on change')
 			.description('generate file to deploy')
-			.action((name, cmd) => {
+			.action((cmd) => {
 				const options = cleanArgs(cmd);
 
-				if (minimist(process.argv.slice(3))._.length > 1) {
+				if (minimist(process.argv.slice(2))._.length > 1) {
 					console.log(
 						chalk.yellow(
 							"\n Info: You provided more than one argument. The first one will be used as the app's name, the rest are ignored."
@@ -97,7 +100,7 @@ module.exports = class Cli {
 					);
 				}
 
-				require('../commands/create')(name, options);
+				require('../commands/generate')(options);
 			});
 
 		this.program.commands.forEach(c => c.on('--help', () => console.log()));

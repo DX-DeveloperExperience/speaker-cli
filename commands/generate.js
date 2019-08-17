@@ -1,60 +1,42 @@
-const liveServer = require('live-server');
 const util = require('util');
-const fs = require('fs');
 const rimraf = require('rimraf');
-const ncp = require('ncp').ncp;
+const fs = require('fs-extra');
 const chokidar = require('chokidar');
+const liveServer = require('live-server');
+const ncp = require('ncp').ncp;
 const ncpPromise = util.promisify(ncp);
-const args = process.argv.slice(2);
-
-const path = require('path');
 
 // Configuration
-const isWatching = args.includes('watch');
-const directoryToWatch = 'slides';
-const mainSlideLocation = './slides/asciidoc/index.adoc';
-const outputDir = './docs/slides/';
+const appDir = process.cwd();
+const directoryToWatch = `${appDir}/slides`;
+const mainSlideLocation = `${appDir}/slides/asciidoc/index.adoc`;
 const directoryToCopy = ['theme', 'fonts', 'images', 'screencasts'];
+const outputDir = `${appDir}/docs/slides`;
 const serverParams = {
-	root: './docs',
+	root: `${appDir}/docs`,
 	open: true,
 	logLevel: 0,
 };
 
-async function generate(...args) {
-	const appDir = path.dirname(require.main.filename);
-
-	console.log(args);
-
-	if (fs.existsSync(`${appDir}/.speaker.json`)) {
-		console.log('okkkkk');
-	} else {
-		console.log('nnnnokkkkk');
+async function generate(options) {
+	if (!fs.existsSync(`${appDir}/.speaker.json`)) {
+		throw new Error('File `.speaker.json` is missing 😢');
 	}
-}
 
-module.exports = (...args) => {
-	return generate(...args).catch(err => {
-		console.error(`⚠️ : `, err);
-		process.exit(1);
-	});
-};
+	if (options.watch) {
+		chokidar
+			.watch(directoryToWatch, {
+				ignored: /(^|[\/\\])\../,
+				persistent: true,
+			})
+			.on('all', (event, path) => {
+				runWorkFlow();
+			});
 
-return;
-
-if (isWatching) {
-	chokidar
-		.watch(directoryToWatch, {
-			ignored: /(^|[\/\\])\../,
-			persistent: true,
-		})
-		.on('all', (event, path) => {
-			runWorkFlow();
-		});
-
-	liveServer.start(serverParams);
-} else {
-	workflow();
+		liveServer.start(serverParams);
+	} else {
+		workflow();
+	}
 }
 
 const runWorkFlow = debounce(function() {
@@ -78,7 +60,7 @@ function workflow() {
 	// Copy all directoryToCopy
 	Promise.all(
 		directoryToCopy.map(path => {
-			ncpPromise(`./${directoryToWatch}/${path}`, `${outputDir}${path}`);
+			ncpPromise(`${directoryToWatch}/${path}`, `${outputDir}/${path}`);
 		})
 	).then(() => {
 		// Load asciidoctor.js and asciidoctor-reveal.js
@@ -111,3 +93,10 @@ function debounce(func, wait, immediate) {
 		if (callNow) func.apply(context, args);
 	};
 }
+
+module.exports = (...args) => {
+	return generate(...args).catch(err => {
+		console.error(`⚠️  `, err);
+		process.exit(1);
+	});
+};

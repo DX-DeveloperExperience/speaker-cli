@@ -7,7 +7,6 @@ const Mustache = require('mustache');
 const ncp = require('ncp').ncp;
 const ncpPromise = util.promisify(ncp);
 const homedir = require('os').homedir();
-const execSync = require('child_process').execSync;
 
 const logging = require('../utils/logging');
 const writeFileTree = require('../utils/writeFileTree');
@@ -168,7 +167,7 @@ async function getProjectOptions(options) {
 
 module.exports = (...args) => {
 	return create(...args).catch(err => {
-		console.error(`⚠️ : `, err);
+		console.error(`⚠️  `, err);
 		process.exit(1);
 	});
 };

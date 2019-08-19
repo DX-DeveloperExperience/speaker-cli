@@ -10,6 +10,7 @@ const homedir = require('os').homedir();
 
 const logging = require('../utils/logging');
 const writeFileTree = require('../utils/writeFileTree');
+const { isValidateName } = require('../utils/validators');
 
 async function create(directoryName, projectOptions) {
 	// TODO read options and use default or distant template like git repo ...
@@ -28,6 +29,9 @@ async function create(directoryName, projectOptions) {
 			return;
 		}
 	} else {
+		if(!isValidateName(directoryName)) {
+			throw new Error('Invalid directory name');
+		}
 		logging(undefined, 'Start create project with name: ', directoryName);
 
 		if (fs.existsSync(directoryName)) {
@@ -109,13 +113,13 @@ async function create(directoryName, projectOptions) {
 
 	const end = new Date() - start;
 	logging(undefined, '🎉 Successfully generated', `Execution time: ${end}ms`);
-	console.info(`Next commands: `)
+	console.info(`Next commands: `);
 	console.info(`cd ${directoryName}`);
 	console.info(`npm install`);
 }
 
 async function getProjectOptions(options) {
-	const config = await inquirer.prompt([
+	let config = await inquirer.prompt([
 		{
 			name: 'projectName',
 			type: 'input',
@@ -148,6 +152,11 @@ async function getProjectOptions(options) {
 			message: `Init git repository ?`,
 		},
 	]);
+
+	config = {
+		...options,
+		...config,
+	};
 
 	// save config in home directory ?
 	const { saveConfig } = await inquirer.prompt({

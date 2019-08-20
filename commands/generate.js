@@ -5,13 +5,13 @@ const chokidar = require('chokidar');
 const liveServer = require('live-server');
 const ncp = require('ncp').ncp;
 const ncpPromise = util.promisify(ncp);
-
 // Configuration
 const appDir = process.cwd();
 const directoryToWatch = `${appDir}/slides`;
 const mainSlideLocation = `${appDir}/slides/asciidoc/index.adoc`;
 const directoryToCopy = ['theme', 'fonts', 'images', 'screencasts'];
 const outputDir = `${appDir}/docs/slides`;
+const package = require(`${appDir}/package.json`);
 const serverParams = {
 	root: `${appDir}/docs`,
 	open: true,
@@ -21,6 +21,23 @@ const serverParams = {
 async function generate(options) {
 	if (!fs.existsSync(`${appDir}/.speaker.json`)) {
 		throw new Error('File `.speaker.json` is missing 😢');
+	}
+
+	if (options.pdf) {
+		console.log('🏗  👷‍  start build pdf ... 📺');
+
+		const puppeteer = require('puppeteer');
+
+		const browser = await puppeteer.launch({ headless: true });
+		const page = await browser.newPage();
+		await page.goto(`file://${outputDir}/index.html?print-pdf`, { waitUntil: 'networkidle0' });
+		await page.pdf({
+			format: 'A4',
+			path: `${package.name}.pdf`,
+		});
+
+		await browser.close();
+		return;
 	}
 
 	if (options.watch) {

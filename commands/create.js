@@ -18,14 +18,14 @@ async function create(directoryName, projectOptions) {
 	// create directory or replace it
 	if (directoryName === '.') {
 		logging(undefined, 'Start create project in current directory: ', process.cwd());
-		const { isCurrentOk } = await inquirer.prompt({
-			name: 'isCurrentOk',
+		const { isCurrentDirectoryOk } = await inquirer.prompt({
+			name: 'isCurrentDirectoryOk',
 			default: false,
 			type: 'confirm',
 			message: `Generate project in current directory?`,
 		});
 
-		if (!isCurrentOk) {
+		if (!isCurrentDirectoryOk) {
 			return;
 		}
 	} else {

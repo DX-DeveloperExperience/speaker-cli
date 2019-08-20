@@ -1,0 +1,20 @@
+{
+	"name": "{{directoryName}}",
+	"version": "1.0.0",
+	"description": "{{projectDescription}}",
+	"directories": {
+		"doc": "docs"
+	},
+	"scripts": {
+		"start": "npm run generate:slides",
+		"generate:slides": "speaker-cli generate --slides",
+		"watch:slides": "speaker-cli generate --slides --watch"
+	},
+	"author": "{{projectAuthorsTwitter}}",
+	"license": "MIT",
+	"devDependencies": {
+		"speaker-cli": "file:/Users/aurelien/Web/speaker-cli"
+	},
+	"dependencies": {
+	}
+}

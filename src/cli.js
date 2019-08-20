@@ -1,15 +1,14 @@
 'use strict';
 
 const program = require('commander');
-const minimist = require('minimist')
-const path = require('path');
+const minimist = require('minimist');
 const chalk = require('chalk');
 const semver = require('semver');
 const requiredVersion = require('../package.json').engines.node;
 const didYouMean = require('didyoumean');
 
 // setting edit distance to 60% of the input string's length
-didYouMean.threshold = 0.6
+didYouMean.threshold = 0.6;
 
 module.exports = class Cli {
 	constructor() {
@@ -80,8 +79,28 @@ module.exports = class Cli {
 						)
 					);
 				}
-				
-				require('../lib/create')(name, options);
+
+				require('../commands/create')(name, options);
+			});
+
+		program
+			.command('generate')
+			.option('-s, --slides', 'generate slides part')
+			.option('-c, --codelab', 'generate codelab part')
+			.option('-w, --watch', 'watch all files and re-run generate on change')
+			.description('generate file to deploy')
+			.action((cmd) => {
+				const options = cleanArgs(cmd);
+
+				if (minimist(process.argv.slice(2))._.length > 1) {
+					console.log(
+						chalk.yellow(
+							"\n Info: You provided more than one argument. The first one will be used as the app's name, the rest are ignored."
+						)
+					);
+				}
+
+				require('../commands/generate')(options);
 			});
 
 		this.program.commands.forEach(c => c.on('--help', () => console.log()));
@@ -112,7 +131,7 @@ function cleanArgs(cmd) {
 	const args = {};
 	cmd.options.forEach(o => {
 		const key = camelize(o.long.replace(/^--/, ''));
-		
+
 		if (typeof cmd[key] !== 'function' && typeof cmd[key] !== 'undefined') {
 			args[key] = cmd[key];
 		}

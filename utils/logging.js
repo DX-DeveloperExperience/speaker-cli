@@ -1,6 +1,13 @@
 const chalk = require('chalk');
 const dim = chalk.dim;
 
+const defaultOptions = {
+    bgColor: '#FADC00',
+    color: '#000000',
+    bold: true,
+    newLine: false,
+};
+
 /**
  * Logging.
  *
@@ -10,22 +17,13 @@ const dim = chalk.dim;
  * @param Object options Configurable options.
  */
 module.exports = (heading = 'SPEAKER-CLI', subHeading = '', subsubHeading = '', options = {}) => {
-	const defaultOptions = {
-		bgColor: '#FADC00',
-		color: '#000000',
-		bold: true,
-		newLine: false,
-	};
 
 	const opts = { ...defaultOptions, ...options };
 
-	// Configure.
 	const bg = opts.bold ? chalk.hex(opts.bgColor).inverse.bold : chalk.hex(opts.bgColor).inverse;
 	const clr = opts.bold ? chalk.hex(opts.color).bold : chalk.hex(opts.color);
-	const br = opts.newLine ? '\n\n' : '';
 
-	// Do it.
-	console.log();
-	console.log(`${clr(`${bg(` ${heading} `)}`)} ${subHeading} ${br}${dim(subsubHeading)}`);
-	console.log();
+	if(opts.newLine) console.log()
+	console.log(`${clr(`${bg(` ${heading} `)}`)} ${subHeading} ${dim(subsubHeading)}`);
+	if(opts.newLine) console.log()
 };

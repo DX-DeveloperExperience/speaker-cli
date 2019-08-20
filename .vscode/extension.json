@@ -1,0 +1,7 @@
+{
+	"recommendations": [
+        "orta.vscode-jest",
+        "dawhite.mustache",
+        "johnpapa.vscode-peacock"
+    ]
+}

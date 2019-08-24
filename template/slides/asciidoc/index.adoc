@@ -13,6 +13,8 @@ ifndef::imagesdir[:imagesdir: images]
 :title-slide-transition: zoom
 :title-slide-transition-speed: fast
 :icons: font
+:revealjs_history: true
+
 
 = Vue.js
 

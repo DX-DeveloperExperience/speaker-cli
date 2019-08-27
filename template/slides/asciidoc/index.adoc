@@ -1,4 +1,4 @@
-:revealjsdir: https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.7.0
+:revealjsdir: https://cdn.rawgit.com/hakimel/reveal.js/3.8.0/
 :revnumber: {project-version}
 :example-caption!:
 ifndef::imagesdir[:imagesdir: images]

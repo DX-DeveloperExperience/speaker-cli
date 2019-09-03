@@ -84,31 +84,36 @@ async function create(directoryName, projectOptions) {
 	const spinner = ora();
 	spinner.color = 'yellow';
 
-	spinner.start('Fetching data from Twitter');
-	/* Initiate the Puppeteer browser */
-	const puppeteer = require('puppeteer');
-	const browser = await puppeteer.launch();
-	const page = await browser.newPage();
 	const authors = config.projectAuthorsTwitter.split(' ');
 	const authorsObject = [];
-	for (let i = 0; i < authors.length; i++) {
-		const twitter = authors[i];
-		await page.goto('https://twitter.com/' + twitter, { waitUntil: 'networkidle0' });
-		let data = await page.evaluate(() => {
-			const title = document
-				.querySelector('title')
-				.innerText.split('(')[0]
-				.trim();
-			const avatar = document.querySelector('img[src*=profile_image').src;
-			return {
-				title,
-				avatar,
-			};
-		});
-		authorsObject.push({
-			twitter,
-			...data,
-		});
+
+	if (authors.length > 0) {
+		const puppeteer = require('puppeteer');
+		const browser = await puppeteer.launch();
+		
+		spinner.start('Fetching data from Twitter 🐦');
+
+		const page = await browser.newPage();
+		for (let i = 0; i < authors.length; i++) {
+			const twitter = authors[i];
+			await page.goto('https://twitter.com/' + twitter, { waitUntil: 'networkidle0' });
+			let data = await page.evaluate(() => {
+				const title = document
+					.querySelector('title')
+					.innerText.split('(')[0]
+					.trim();
+				const avatar = document.querySelector('img[src*=profile_image').src;
+				return {
+					title,
+					avatar,
+				};
+			});
+			authorsObject.push({
+				twitter,
+				...data,
+			});
+		}
+		spinner.succeed('Fetch data from Twitter 🐦');
 	}
 
 	const specialConfig = {

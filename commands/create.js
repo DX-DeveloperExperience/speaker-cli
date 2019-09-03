@@ -3,14 +3,16 @@ const util = require('util');
 const inquirer = require('inquirer');
 const rimraf = require('rimraf');
 const glob = require('glob');
-const Mustache = require('mustache');
 const ncp = require('ncp').ncp;
-const ncpPromise = util.promisify(ncp);
 const homedir = require('os').homedir();
+const ncpPromise = util.promisify(ncp);
+const ora = require('ora');
 
 const logging = require('../utils/logging');
 const writeFileTree = require('../utils/writeFileTree');
 const { isValidateName } = require('../utils/validators');
+const { mustacheFiles } = require('../utils/mustache');
+const { execShellCommand } = require('../utils/exec');
 
 async function create(directoryName, projectOptions) {
 	// TODO read options and use default or distant template like git repo ...
@@ -29,7 +31,7 @@ async function create(directoryName, projectOptions) {
 			return;
 		}
 	} else {
-		if(!isValidateName(directoryName)) {
+		if (!isValidateName(directoryName)) {
 			throw new Error('Invalid directory name');
 		}
 		logging(undefined, 'Start create project with name: ', directoryName);
@@ -56,6 +58,7 @@ async function create(directoryName, projectOptions) {
 
 	if (fs.existsSync(`${homedir}/.speaker.json`)) {
 		const defautConfig = fs.readFileSync(`${homedir}/.speaker.json`, 'utf8');
+		delete defautConfig.directoryName;
 		console.log('Default config:');
 		console.log(defautConfig);
 		let { useDefaultConfig } = await inquirer.prompt({
@@ -76,46 +79,72 @@ async function create(directoryName, projectOptions) {
 
 	const start = new Date();
 
-	fs.mkdir(directoryName);
-
-	// store config into .spearker
-	await writeFileTree(`${directoryName}`, {
-		'.speaker.json': JSON.stringify(config, null, 4),
-	});
-
-	// generate project from template
-	try {
-		await ncpPromise(`${__dirname}/../template`, `${directoryName}`);
-	} catch (error) {
-		logging(undefined, 'Error during creating project: ', directoryName);
-		console.log(error);
-		process.exit(1);
-	}
-
-	process.chdir(directoryName);
+	fs.mkdirSync(directoryName);
 
 	const specialConfig = {
 		...config,
 		authors: config.projectAuthorsTwitter.split(' '),
 	};
 
-	// search all files with template to replace
-	const filesPath = glob.sync('./**/*.mustache', {});
-
-	// loop files and replace template
-	filesPath.forEach(filePath => {
-		const fileContent = fs.readFileSync(filePath, 'utf8');
-		const newFileContent = Mustache.render(fileContent, specialConfig);
-		fs.writeFileSync(filePath, newFileContent);
-		const filePathWithoutMustache = filePath.replace('.mustache', '');
-		fs.renameSync(filePath, filePathWithoutMustache);
-	});
-
-	const end = new Date() - start;
-	logging(undefined, '🎉 Successfully generated', `Execution time: ${end}ms`);
-	console.info(`Next commands: `);
-	console.info(`cd ${directoryName}`);
-	console.info(`npm install`);
+	const spinner = ora();
+	spinner.color = 'yellow';
+	// store config into .spearker
+	spinner.start('Creating speaker config file');
+	writeFileTree(`${directoryName}`, {
+		'.speaker.json': JSON.stringify(config, null, 4),
+	})
+		.catch(error => {
+			spinner.fail(`Error: ${error}`);
+		})
+		.then(() => {
+			spinner.succeed('Create speaker config file');
+			spinner.start('Copying all template files to project');
+			return ncpPromise(`${__dirname}/../template`, `${directoryName}`);
+		})
+		.catch(error => {
+			logging(undefined, 'Error during creating project: ', directoryName);
+			spinner.fail(`Error: ${error}`);
+			process.exit(1);
+		})
+		.then(() => {
+			spinner.succeed('Copy all template files to project');
+			// search all files with template to replace
+			process.chdir(directoryName);
+			const filesPath = glob.sync('./**/*.mustache', {});
+			process.chdir('./../');
+			spinner.start('Replacing config in all 👨🏻 files');
+			return mustacheFiles(directoryName, filesPath, specialConfig);
+		})
+		.then(() => {
+			spinner.succeed('Replace config in all 👨🏻files');
+			const end = new Date() - start;
+			logging(undefined, '🎉 Successfully generated', `Execution time: ${end}ms`);
+		})
+		.then(() => {
+			spinner.start('Installing NPM packages 🧸');
+			return execShellCommand('npm i', { cwd: directoryName });
+		})
+		.catch(err => {
+			spinner.fail(`exec error: ${err}`);
+			throw new Error();
+		})
+		.then(stdout => {
+			spinner.succeed(`Install NPM packages: ${stdout}`);
+			if (config.gitinit) {
+				spinner.start('Initialiting GIT repo 🧸');
+				return execShellCommand('git init', { cwd: directoryName });
+			}
+			return new Promise.resolve();
+		})
+		.then(() => {
+			spinner.succeed('Init GIT repo');
+		})
+		.finally(() => {
+			console.info(`Next commands: `);
+			console.info(`cd ${directoryName}`);
+			console.info(`npm start`);
+			process.exit(0);
+		});
 }
 
 async function getProjectOptions(options) {

@@ -1,0 +1,43 @@
+++++
+<style>
+
+.speaker {
+  width: 50%;
+  margin: auto;
+  text-align: left;
+  display: flex !important;
+  flex-flow: row wrap;
+}
+
+#speaker-bio {
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  padding-right: 100px;
+  flex-grow: 2;
+}
+
+.speaker img {
+  border-radius: 50%;
+  width: 50%;
+}
+</style>
+++++
+
+{{#authors}}
+[.speaker]
+=== !
+
+[id="speaker-bio"]
+--
+{{ title }}
+
+{{twitter}}
+--
+
+image::{{{avatar}}}[]
+
+[.notes]
+--
+--
+{{/authors}}

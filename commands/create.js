@@ -81,15 +81,44 @@ async function create(directoryName, projectOptions) {
 
 	fs.mkdirSync(directoryName);
 
-	const specialConfig = {
-		...config,
-		authors: config.projectAuthorsTwitter.split(' '),
-	};
-
 	const spinner = ora();
 	spinner.color = 'yellow';
-	// store config into .spearker
+
+	spinner.start('Fetching data from Twitter');
+	/* Initiate the Puppeteer browser */
+	const puppeteer = require('puppeteer');
+	const browser = await puppeteer.launch();
+	const page = await browser.newPage();
+	const authors = config.projectAuthorsTwitter.split(' ');
+	const authorsObject = [];
+	for (let i = 0; i < authors.length; i++) {
+		const twitter = authors[i];
+		await page.goto('https://twitter.com/' + twitter, { waitUntil: 'networkidle0' });
+		let data = await page.evaluate(() => {
+			const title = document
+				.querySelector('title')
+				.innerText.split('(')[0]
+				.trim();
+			const avatar = document.querySelector('img[src*=profile_image').src;
+			return {
+				title,
+				avatar,
+			};
+		});
+		authorsObject.push({
+			twitter,
+			...data,
+		});
+	}
+
+	const specialConfig = {
+		...config,
+		authors: authorsObject,
+	};
+	await browser.close();
+
 	spinner.start('Creating speaker config file');
+
 	writeFileTree(`${directoryName}`, {
 		'.speaker.json': JSON.stringify(config, null, 4),
 	})
@@ -142,7 +171,7 @@ async function create(directoryName, projectOptions) {
 		.finally(() => {
 			console.info(`Next commands: `);
 			console.info(`cd ${directoryName}`);
-			console.info(`npm start`);
+			console.info(`npm run watch:slides`);
 			process.exit(0);
 		});
 }

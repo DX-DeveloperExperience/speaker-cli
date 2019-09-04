@@ -1,0 +1,44 @@
+version: 2
+jobs:
+  install-dependencies:
+    docker:
+      - image: circleci/node:12
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - dependencies-{{ checksum "package.json" }}
+            - dependencies-
+      - run:
+          name: Download dependencies
+          command: npm install --quiet
+      - save_cache:
+          paths: [node_modules]
+          key: dependencies-{{ checksum "package.json" }}
+      - persist_to_workspace:
+          root: ./
+          paths: [node_modules]
+  build:
+    docker:
+      - image: circleci/node:12
+    steps:
+      - setup_remote_docker
+      - checkout
+      - attach_workspace:
+          at: ./
+      - run:
+          name: npm run test
+          command: npm run test
+workflows:
+  version: 2
+  dependencies-build-and-deploy:
+    jobs:
+      - install-dependencies:
+          filters:
+            branches:
+              ignore: gh-pages
+      - build:
+          requires: [install-dependencies]
+          filters:
+            branches:
+              ignore: gh-pages

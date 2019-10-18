@@ -114,13 +114,14 @@ async function create(directoryName, projectOptions) {
 			});
 		}
 		spinner.succeed('Fetch data from Twitter 🐦');
+		
+		await browser.close();
 	}
 
 	const specialConfig = {
 		...config,
 		authors: authorsObject,
 	};
-	await browser.close();
 
 	spinner.start('Creating speaker config file');
 

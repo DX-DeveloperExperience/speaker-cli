@@ -9,7 +9,7 @@ const ncpPromise = util.promisify(ncp);
 const appDir = process.cwd();
 const directoryToWatch = `${appDir}/slides`;
 const mainSlideLocation = `${appDir}/slides/asciidoc/index.adoc`;
-const directoryToCopy = ['theme', 'fonts', 'images', 'screencasts'];
+const directoriesToCopy = ['theme', 'fonts', 'images', 'screencasts', 'reveal'];
 const outputDir = `${appDir}/docs/slides`;
 const package = require(`${appDir}/package.json`);
 const serverParams = {
@@ -74,9 +74,9 @@ function workflow() {
 	// Create slides directory
 	fs.mkdirSync(outputDir);
 
-	// Copy all directoryToCopy
+	// Copy all directories
 	Promise.all(
-		directoryToCopy.map(path => {
+		directoriesToCopy.map(path => {
 			ncpPromise(`${directoryToWatch}/${path}`, `${outputDir}/${path}`);
 		})
 	).then(() => {

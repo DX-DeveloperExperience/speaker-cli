@@ -86,8 +86,8 @@ module.exports = class Cli {
 		program
 			.command('generate')
 			.option('-s, --slides', 'generate slides part')
+			.option('-l, --labs', 'generate labs part')
 			.option('-p, --pdf', 'generate the pdf')
-			.option('-c, --codelab', 'generate codelab part')
 			.option('-w, --watch', 'watch all files and re-run generate on change')
 			.description('generate file to deploy')
 			.action(cmd => {

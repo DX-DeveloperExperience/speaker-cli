@@ -19,7 +19,7 @@ async function create(directoryName, projectOptions) {
 
 	// create directory or replace it
 	if (directoryName === '.') {
-		logging(undefined, 'Start create project in current directory: ', process.cwd());
+		logging(undefined, 'Start creating project in current directory: ', process.cwd());
 		const { isCurrentDirectoryOk } = await inquirer.prompt({
 			name: 'isCurrentDirectoryOk',
 			default: false,
@@ -34,7 +34,7 @@ async function create(directoryName, projectOptions) {
 		if (!isValidateName(directoryName)) {
 			throw new Error('Invalid directory name');
 		}
-		logging(undefined, 'Start create project with name: ', directoryName);
+		logging(undefined, 'Start creating project with name: ', directoryName);
 
 		if (fs.existsSync(directoryName)) {
 			logging(undefined, 'Create project error: ', 'directory already exist');
@@ -90,31 +90,35 @@ async function create(directoryName, projectOptions) {
 	if (authors.length > 0) {
 		const puppeteer = require('puppeteer');
 		const browser = await puppeteer.launch();
-		
+
 		spinner.start('Fetching data from Twitter 🐦');
 
-		const page = await browser.newPage();
-		for (let i = 0; i < authors.length; i++) {
-			const twitter = authors[i];
-			await page.goto('https://twitter.com/' + twitter, { waitUntil: 'networkidle0' });
-			let data = await page.evaluate(() => {
-				const title = document
-					.querySelector('title')
-					.innerText.split('(')[0]
-					.trim();
-				const avatar = document.querySelector('img[src*=profile_image').src;
-				return {
-					title,
-					avatar,
-				};
-			});
-			authorsObject.push({
-				twitter,
-				...data,
-			});
+		try {
+			const page = await browser.newPage();
+			for (let i = 0; i < authors.length; i++) {
+				const twitter = authors[i];
+				await page.goto('https://twitter.com/' + twitter, { waitUntil: 'networkidle0' });
+				let data = await page.evaluate(() => {
+					const title = document
+						.querySelector('title')
+						.innerText.split('(')[0]
+						.trim();
+					const avatar = document.querySelector('img[src*=profile_image').src;
+					return {
+						title,
+						avatar,
+					};
+				});
+				authorsObject.push({
+					twitter,
+					...data,
+				});
+			}
+			spinner.succeed('Fetch data from Twitter 🐦');
+		} catch (error) {
+			spinner.fail(`Fetch data from Twitter 🐦 (${error.message})`);
 		}
-		spinner.succeed('Fetch data from Twitter 🐦');
-		
+
 		await browser.close();
 	}
 
@@ -151,33 +155,36 @@ async function create(directoryName, projectOptions) {
 			return mustacheFiles(directoryName, filesPath, specialConfig);
 		})
 		.then(() => {
-			spinner.succeed('Replace config in all 👨🏻files');
-			const end = new Date() - start;
-			logging(undefined, '🎉 Successfully generated', `Execution time: ${end}ms`);
-		})
-		.then(() => {
-			spinner.start('Installing NPM packages 🧸');
+			spinner.succeed('Replace config in all 👨🏻 files');
+			spinner.start(`Installing NPM packages 🧸`);
 			return execShellCommand('npm i', { cwd: directoryName });
 		})
-		.catch(err => {
-			spinner.fail(`exec error: ${err}`);
-			throw new Error();
+		.catch(error => {
+			spinner.fail(`Installing NPM packages 🧸`);
 		})
-		.then(stdout => {
-			spinner.succeed(`Install NPM packages: ${stdout}`);
+		.then(() => {
+			// spinner.succeed(`Installing NPM packages 🧸`);
 			if (config.gitinit) {
-				spinner.start('Initialiting GIT repo 🧸');
+				spinner.start('Initialiting GIT repo 🐙');
 				return execShellCommand('git init', { cwd: directoryName });
 			}
 			return new Promise.resolve();
 		})
 		.then(() => {
-			spinner.succeed('Init GIT repo');
+			if (config.gitinit) {
+				spinner.succeed('Initialiting GIT repo 🐙');
+			}
+			return new Promise.resolve();
 		})
 		.finally(() => {
+			const end = new Date() - start;
+			console.log('');
+			logging(undefined, '🎉 Successfully created', `Execution time: ${end}ms`);
+			console.log('');
 			console.info(`Next commands: `);
 			console.info(`cd ${directoryName}`);
 			console.info(`npm run watch:slides`);
+
 			process.exit(0);
 		});
 }

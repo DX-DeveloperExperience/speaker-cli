@@ -5,12 +5,16 @@ const chokidar = require('chokidar');
 const liveServer = require('live-server');
 const ncp = require('ncp').ncp;
 const ncpPromise = util.promisify(ncp);
+const ora = require('ora');
+const logging = require('../utils/logging');
+
 // Configuration
+const info = false;
+const spinner = ora();
+spinner.color = 'yellow';
+spinner.indent = 5;
+const start = new Date();
 const appDir = process.cwd();
-const directoryToWatch = `${appDir}/slides`;
-const mainSlideLocation = `${appDir}/slides/asciidoc/index.adoc`;
-const directoriesToCopy = ['theme', 'fonts', 'images', 'screencasts', 'reveal'];
-const outputDir = `${appDir}/docs/slides`;
 const package = require(`${appDir}/package.json`);
 const serverParams = {
 	root: `${appDir}/docs`,
@@ -18,66 +22,119 @@ const serverParams = {
 	logLevel: 0,
 };
 
+// slides
+const slidesDirectoryToWatch = `${appDir}/slides`;
+const slidesOutputDir = `${appDir}/docs/slides`;
+const mainSlideLocation = `${appDir}/slides/asciidoc/index.adoc`;
+const slidesDirectoriesToCopy = ['theme', 'fonts', 'images', 'screencasts', 'reveal'];
+
+// labs
+
 async function generate(options) {
 	if (!fs.existsSync(`${appDir}/.speaker.json`)) {
 		throw new Error('File `.speaker.json` is missing 😢');
 	}
 
 	if (options.pdf) {
-		console.log('🏗  👷‍  start build pdf ... 📺');
+		console.log('🏗  👷‍  start building pdf ... 📺');
 
 		const puppeteer = require('puppeteer');
 
 		const browser = await puppeteer.launch({ headless: true });
 		const page = await browser.newPage();
-		await page.goto(`file://${outputDir}/index.html?print-pdf`, { waitUntil: 'networkidle0' });
+		await page.goto(`file://${slidesOutputDir}/index.html?print-pdf`, {
+			waitUntil: 'networkidle0',
+		});
 		await page.pdf({
 			format: 'A4',
 			path: `${package.name}.pdf`,
 		});
 
 		await browser.close();
+		const end = new Date() - start;
+		console.log('🎉 👌  pdf successfully generated');
+		console.info('Execution time: %dms', end);
 		return;
 	}
 
 	if (options.watch) {
+		// TODO: test if only you are only watching labs or slides
+		// ...
 		chokidar
-			.watch(directoryToWatch, {
+			.watch(slidesDirectoryToWatch, {
 				ignored: /(^|[\/\\])\../,
 				persistent: true,
 			})
 			.on('all', (event, path) => {
-				runWorkFlow();
+				runWorkFlow(options);
 			});
 
 		liveServer.start(serverParams);
 	} else {
-		workflow();
+		workflow(options);
 	}
 }
 
-const runWorkFlow = debounce(function() {
-	console.log('📏 👀  change detected !');
-	workflow();
-}, 2000);
+function runWorkFlow(options) {
+	debounce(function() {
+		console.log('📏 👀  change detected !');
+		workflow(options);
+	}, 2000);
+}
 
-function workflow() {
-	const start = new Date();
+async function workflow(options) {
+	if (options.labs) {
+		await labsWorkflow(options);
+	} else if (options.slides) {
+		await slidesWorkflow(options);
+	} else {
+		await distWorkflow(options);
+		await labsWorkflow(options);
+		await slidesWorkflow(options);
+	}
 
-	console.log('🏗  👷‍  start build slides ... 📺');
+	const end = new Date() - start;
+	console.log('');
+	logging(undefined, ' 🎉  Successfully generated', `Execution time: ${end}ms`);
+	console.log('');
+}
+
+async function distWorkflow(options) {
+	spinner.start(` Build main page 👨🏻‍💻`);
+	// part to generate all the final directory with the main project page
+
+	const end = new Date() - start;
+	spinner.succeed();
+	if (info) console.info('Execution time: %dms', end);
+	return;
+}
+
+async function labsWorkflow(options) {
+	spinner.start(` Build labs 🧪`);
+
+	// part to generate all the final directory with the main project page
+
+	const end = new Date() - start;
+	spinner.succeed();
+	if (info) console.info('Execution time: %dms', end);
+	return;
+}
+
+async function slidesWorkflow(options) {
+	spinner.start(` Build slides 📺`);
 
 	// Clean
-	if (fs.existsSync(outputDir)) {
-		rimraf.sync(outputDir);
+	if (fs.existsSync(slidesOutputDir)) {
+		rimraf.sync(slidesOutputDir);
 	}
 
 	// Create slides directory
-	fs.mkdirSync(outputDir);
+	fs.mkdirSync(slidesOutputDir);
 
 	// Copy all directories
-	Promise.all(
-		directoriesToCopy.map(path => {
-			ncpPromise(`${directoryToWatch}/${path}`, `${outputDir}/${path}`);
+	return Promise.all(
+		slidesDirectoriesToCopy.map(path => {
+			ncpPromise(`${slidesDirectoryToWatch}/${path}`, `${slidesOutputDir}/${path}`);
 		})
 	).then(() => {
 		// Load asciidoctor.js and asciidoctor-reveal.js
@@ -86,12 +143,12 @@ function workflow() {
 		asciidoctorRevealjs.register();
 
 		// Convert the document 'index.adoc' using the reveal.js converter
-		const options = { safe: 'safe', backend: 'revealjs', to_dir: outputDir };
+		const options = { safe: 'safe', backend: 'revealjs', to_dir: slidesOutputDir };
 		asciidoctor.convertFile(mainSlideLocation, options);
 
 		const end = new Date() - start;
-		console.log('🎉 👌  slides successfully generated');
-		console.info('Execution time: %dms', end);
+		spinner.succeed();
+		if (info) console.info('Execution time: %dms', end);
 	});
 }
 

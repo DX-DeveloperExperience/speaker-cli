@@ -127,7 +127,7 @@ async function create(directoryName, projectOptions) {
 		authors: authorsObject,
 	};
 
-	spinner.start('Creating speaker config file');
+	spinner.start('Creating speaker config file 🎤');
 
 	writeFileTree(`${directoryName}`, {
 		'.speaker.json': JSON.stringify(config, null, 4),
@@ -136,8 +136,8 @@ async function create(directoryName, projectOptions) {
 			spinner.fail(`Error: ${error}`);
 		})
 		.then(() => {
-			spinner.succeed('Create speaker config file');
-			spinner.start('Copying all template files to project');
+			spinner.succeed('Create speaker config file 🎤');
+			spinner.start('Copying all template files to project 👯‍♂️');
 			return ncpPromise(`${__dirname}/../template`, `${directoryName}`);
 		})
 		.catch(error => {
@@ -146,7 +146,7 @@ async function create(directoryName, projectOptions) {
 			process.exit(1);
 		})
 		.then(() => {
-			spinner.succeed('Copy all template files to project');
+			spinner.succeed('Copy all template files to project 👯‍♂️');
 			// search all files with template to replace
 			process.chdir(directoryName);
 			const filesPath = glob.sync('./**/*.mustache', {});

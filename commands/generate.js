@@ -22,6 +22,8 @@ const serverParams = {
 	logLevel: 0,
 };
 
+const localConfig = require(`${appDir}/.speaker.json`);
+
 // slides
 const slidesDirectoryToWatch = `${appDir}/slides`;
 const slidesOutputDir = `${appDir}/docs/slides`;
@@ -36,8 +38,7 @@ async function generate(options) {
 	}
 
 	if (options.pdf) {
-		console.log('🏗  👷‍  start building pdf ... 📺');
-
+		spinner.start(` Build PDF 📺`);
 		const puppeteer = require('puppeteer');
 
 		const browser = await puppeteer.launch({ headless: true });
@@ -51,9 +52,12 @@ async function generate(options) {
 		});
 
 		await browser.close();
+		spinner.succeed();
+
 		const end = new Date() - start;
-		console.log('🎉 👌  pdf successfully generated');
-		console.info('Execution time: %dms', end);
+		console.log('');
+		logging(undefined, ' 🎉  PDF successfully generated', `Execution time: ${end}ms`);
+		console.log('');
 		return;
 	}
 
@@ -112,7 +116,13 @@ async function distWorkflow(options) {
 async function labsWorkflow(options) {
 	spinner.start(` Build labs 🧪`);
 
-	// part to generate all the final directory with the main project page
+	if (localConfig.labsConfig.format === 'md') {
+		console.log('format md');
+	} else if (localConfig.labsConfig.format === 'adoc') {
+		console.log('format adoc');
+	} else {
+		console.log('format undefined');
+	}
 
 	const end = new Date() - start;
 	spinner.succeed();

@@ -6,9 +6,12 @@
 		"doc": "docs"
 	},
 	"scripts": {
-		"start": "npm run generate:slides",
+		"start": "npm run generate",
+		"generate": "speaker-cli generate",
 		"generate:slides": "speaker-cli generate --slides",
-		"watch:slides": "speaker-cli generate --slides --watch"
+		"watch:slides": "speaker-cli generate --slides --watch",
+		"generate:labs": "speaker-cli generate --labs",
+		"watch:labs": "speaker-cli generate --labs --watch"
 	},
 	"author": "{{projectAuthorsTwitter}}",
 	"license": "MIT",

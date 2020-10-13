@@ -212,11 +212,27 @@ async function getProjectOptions(options) {
 			type: 'checkbox',
 			message: `Pick all content needed:`,
 			choices: [
-				{ name: 'Codelab', value: 'codelab' },
+				{ name: 'Codelab', value: 'labs' },
 				{ name: 'Slides', value: 'slides' },
 				{ name: 'Other', value: 'other' },
 			],
-		},
+		}
+	]);
+
+	let labsConfig = {};	
+	if(config.types.includes('labs')){
+		labsConfig = await inquirer.prompt([{
+			name: 'labsConfig.format',
+			type: 'list',
+			message: `Choose the codelab files format:`,
+			choices: [
+				{ name: 'Markdown', value: 'md' },
+				{ name: 'AsciiDoc', value: 'adoc' }
+			],
+		}]);
+	}
+
+	let gitConfig = await inquirer.prompt([
 		{
 			name: 'gitinit',
 			type: 'confirm',
@@ -227,6 +243,8 @@ async function getProjectOptions(options) {
 	config = {
 		...options,
 		...config,
+		...labsConfig,
+		...gitConfig,
 	};
 
 	// save config in home directory ?

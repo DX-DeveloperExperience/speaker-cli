@@ -15,7 +15,3 @@ function test() {
 ```
 
 Congrats. You finish the first step
-
-## Step 2
-
-This is the second step of this codelab.

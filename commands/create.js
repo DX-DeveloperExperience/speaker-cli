@@ -154,16 +154,43 @@ async function create(directoryName, projectOptions) {
 			spinner.start('Replacing config in all 👨🏻 files');
 			return mustacheFiles(directoryName, filesPath, specialConfig);
 		})
+
+		.then(() => {
+			spinner.succeed('Replace config in all 👨🏻 files');
+			if (config.labsConfig && config.labsConfig.format) {
+				const extToDelete = config.labsConfig.format === 'md' ? 'adoc' : 'md';
+				spinner.start('Cleaning labs file 🧹');
+				var files = [
+					`${directoryName}/labs/01-step.${extToDelete}`,
+					`${directoryName}/labs/02-step.${extToDelete}`,
+				];
+				return Promise.all(
+					files.map(async file => {
+						if (await fs.existsSync(file)) {
+							await fs.unlinkSync(file);
+						}
+					})
+				);
+			}
+			return new Promise.resolve();
+		})
+		.then(() => {
+			if (config.labsConfig && config.labsConfig.format) {
+				spinner.succeed('Cleaning labs file 🧹');
+			}
+			spinner.start(`Installing NPM packages 🧸`);
+			return execShellCommand('npm i', { cwd: directoryName });
+		})
 		.then(() => {
 			spinner.succeed('Replace config in all 👨🏻 files');
 			spinner.start(`Installing NPM packages 🧸`);
 			return execShellCommand('npm i', { cwd: directoryName });
 		})
-		.catch(error => {
+		.catch(() => {
 			spinner.fail(`Installing NPM packages 🧸`);
 		})
 		.then(() => {
-			// spinner.succeed(`Installing NPM packages 🧸`);
+			spinner.succeed(`Installing NPM packages 🧸`);
 			if (config.gitinit) {
 				spinner.start('Initialiting GIT repo 🐙');
 				return execShellCommand('git init', { cwd: directoryName });
@@ -216,20 +243,19 @@ async function getProjectOptions(options) {
 				{ name: 'Slides', value: 'slides' },
 				{ name: 'Other', value: 'other' },
 			],
-		}
+		},
 	]);
 
-	let labsConfig = {};	
-	if(config.types.includes('labs')){
-		labsConfig = await inquirer.prompt([{
-			name: 'labsConfig.format',
-			type: 'list',
-			message: `Choose the codelab files format:`,
-			choices: [
-				{ name: 'Markdown', value: 'md' },
-				{ name: 'AsciiDoc', value: 'adoc' }
-			],
-		}]);
+	let labsConfig = {};
+	if (config.types.includes('labs')) {
+		labsConfig = await inquirer.prompt([
+			{
+				name: 'labsConfig.format',
+				type: 'list',
+				message: `Choose the codelab files format:`,
+				choices: [{ name: 'Markdown', value: 'md' }, { name: 'AsciiDoc', value: 'adoc' }],
+			},
+		]);
 	}
 
 	let gitConfig = await inquirer.prompt([

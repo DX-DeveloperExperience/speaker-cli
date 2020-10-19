@@ -10,15 +10,18 @@ const Mustache = require('mustache');
  */
 exports.mustacheFiles = function(directory, filesPath, parserData) {
 	return new Promise((resolve, reject) => {
-		// TODO implement rejest part, we are not in Care Bears world 💋🧸🌏
-		filesPath.forEach(filePath => {
-			filePath = `${directory}/${filePath}`;
-			const fileContent = fs.readFileSync(filePath, 'utf8');
-			const newFileContent = Mustache.render(fileContent, parserData);
-			fs.writeFileSync(filePath, newFileContent);
-			const filePathWithoutMustache = filePath.replace('.mustache', '');
-			fs.renameSync(filePath, filePathWithoutMustache);
-		});
-		resolve();
+		try {
+			filesPath.forEach(filePath => {
+				filePath = `${directory}/${filePath}`;
+				const fileContent = fs.readFileSync(filePath, 'utf8');
+				const newFileContent = Mustache.render(fileContent, parserData);
+				fs.writeFileSync(filePath, newFileContent);
+				const filePathWithoutMustache = filePath.replace('.mustache', '');
+				fs.renameSync(filePath, filePathWithoutMustache);
+			});
+			resolve();
+		} catch (error) {
+			reject(error);
+		}
 	});
 };

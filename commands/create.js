@@ -122,9 +122,11 @@ async function create(directoryName, projectOptions) {
 		await browser.close();
 	}
 
-	const specialConfig = {
+	const parserData = {
 		...config,
 		authors: authorsObject,
+		haveSlides: config.types.includes('slides'),
+		haveLabs: config.types.includes('labs'),
 	};
 
 	spinner.start('Creating speaker config file 🎤');
@@ -152,9 +154,12 @@ async function create(directoryName, projectOptions) {
 			const filesPath = glob.sync('./**/*.mustache', {});
 			process.chdir('./../');
 			spinner.start('Replacing config in all 👨🏻 files');
-			return mustacheFiles(directoryName, filesPath, specialConfig);
+			return mustacheFiles(directoryName, filesPath, parserData);
 		})
-
+		.catch(err => {
+			spinner.fail(`Replacing config in all 👨🏻 files`);
+			console.log(err);
+		})
 		.then(() => {
 			spinner.succeed('Replace config in all 👨🏻 files');
 			if (config.labsConfig && config.labsConfig.format) {
@@ -181,16 +186,12 @@ async function create(directoryName, projectOptions) {
 			spinner.start(`Installing NPM packages 🧸`);
 			return execShellCommand('npm i', { cwd: directoryName });
 		})
-		.then(() => {
-			spinner.succeed('Replace config in all 👨🏻 files');
-			spinner.start(`Installing NPM packages 🧸`);
-			return execShellCommand('npm i', { cwd: directoryName });
-		})
-		.catch(() => {
-			spinner.fail(`Installing NPM packages 🧸`);
+		.catch(err => {
+			spinner.fail(`Install NPM packages 🧸`);
+			console.error(err);
 		})
 		.then(() => {
-			spinner.succeed(`Installing NPM packages 🧸`);
+			spinner.succeed(`Install NPM packages 🧸`);
 			if (config.gitinit) {
 				spinner.start('Initialiting GIT repo 🐙');
 				return execShellCommand('git init', { cwd: directoryName });

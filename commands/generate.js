@@ -7,8 +7,9 @@ const ncp = require('ncp').ncp;
 const ncpPromise = util.promisify(ncp);
 const ora = require('ora');
 const logging = require('../utils/logging');
+const codelab = require('@dxdeveloperexperience/codelab-generator');
 
-// Configuration
+// configurations
 const info = false;
 const spinner = ora();
 spinner.color = 'yellow';
@@ -22,6 +23,7 @@ const serverParams = {
 	logLevel: 0,
 };
 
+// global
 const localConfig = require(`${appDir}/.speaker.json`);
 
 // slides
@@ -31,6 +33,8 @@ const mainSlideLocation = `${appDir}/slides/asciidoc/index.adoc`;
 const slidesDirectoriesToCopy = ['theme', 'fonts', 'images', 'screencasts', 'reveal'];
 
 // labs
+const labsDirectoryToWatch = `${appDir}/labs`;
+const labsOutputDir = `${appDir}/docs/labs`;
 
 async function generate(options) {
 	if (!fs.existsSync(`${appDir}/.speaker.json`)) {
@@ -114,15 +118,38 @@ async function distWorkflow(options) {
 }
 
 async function labsWorkflow(options) {
-	spinner.start(` Build labs 🧪`);
+	spinner.start(`Build labs 🧪`);
+	let extension = localConfig.labsConfig.format;
 
-	if (localConfig.labsConfig.format === 'md') {
-		console.log('format md');
-	} else if (localConfig.labsConfig.format === 'adoc') {
-		console.log('format adoc');
-	} else {
-		console.log('format undefined');
+	if (!extension) {
+		spinner.fail('Format undefined');
+		return;
 	}
+
+	let files = [];
+	try {
+		files = await fs.readdirSync(labsDirectoryToWatch);
+	} catch (error) {
+		spinner.fail('Error during building labs 🙄');
+		console.error(error);
+	}
+	const labsFiles = files.filter(el => el.endsWith(`.${extension}`));
+
+	let labsContent = '';
+	labsFiles.map(fileName => {
+		labsContent += fs.readFileSync(`${labsDirectoryToWatch}/${fileName}`, 'utf8');
+		labsContent += '\n';
+	});
+
+	const labTmpFile = `${labsDirectoryToWatch}/.tmp.${extension}`;
+
+	if (await fs.existsSync(labTmpFile)) {
+		fs.unlinkSync(labTmpFile);
+	}
+	fs.writeFileSync(labTmpFile, labsContent);
+
+	await codelab(labTmpFile, labsOutputDir, { base: '' });
+	fs.unlinkSync(labTmpFile);
 
 	const end = new Date() - start;
 	spinner.succeed();

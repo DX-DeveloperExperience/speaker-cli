@@ -30,7 +30,7 @@
 		"commander": "^2.20.0",
 		"didyoumean": "^1.2.1",
 		"esm": "^3.2.25",
-		"fs-extra": "^8.1.0",
+		"fs-extra": "^9.0.0",
 		"inquirer": "^6.5.1",
 		"live-server": "^1.2.1",
 		"minimist": "^1.2.0",

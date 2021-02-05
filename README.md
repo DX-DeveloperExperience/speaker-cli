@@ -6,6 +6,13 @@
 
 Speaker CLI help people to generate slides / codelab and deploy it on gh-page / Netlify / Firebase / ... 📺
 
+## Showcase
+
+Some talks generated using speaker-cli
+- 🐱 https://github.com/T3kstiil3/codelab-nestjs
+- 🏗 https://github.com/T3kstiil3/bazel-bazel-bazel
+- 🌏 https://github.com/EmmanuelDemey/codelab-litelement
+
 ## How to use 🧐
 
 ### Create a new projet
@@ -14,7 +21,23 @@ Speaker CLI help people to generate slides / codelab and deploy it on gh-page / 
 $ speaker-cli create your-project-name
 ```
 
-Create with a previous config
+Follow the cli and enjoy 😊 This should create:
+
+A awesome homepage with links to your contents
+
+![image](https://user-images.githubusercontent.com/3717296/107054957-084caa80-67d1-11eb-9625-9f49abc061b5.png)
+
+Slides using **Markdown** or **AsciiDoc** and **Revealjs**
+
+![image](https://user-images.githubusercontent.com/3717296/107055025-1d293e00-67d1-11eb-9b06-535d5501b7dd.png)
+
+Codelab using **Markdown** or **AsciiDoc**
+
+![image](https://user-images.githubusercontent.com/3717296/107055091-35995880-67d1-11eb-80e4-895e7d77d2c3.png)
+
+### Tips
+
+Create with project using your previous config 👌
 
 ![create with previous config](docs/img/create-with-default-config.png)
 
@@ -25,6 +48,7 @@ $ speaker-cli -h
 ```
 
 ![help](docs/img/help.png)
+
 
 ## Dev 👨🏻‍💻
 

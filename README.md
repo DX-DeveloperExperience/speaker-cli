@@ -21,19 +21,19 @@ Some talks generated using speaker-cli
 $ speaker-cli create your-project-name
 ```
 
-Follow the cli and enjoy 😊 This should create:
+#### Follow the cli and enjoy 😊. This should created:
 
-A awesome homepage with links to your contents
+- Homepage with links to your contents
 
-![image](https://user-images.githubusercontent.com/3717296/107054957-084caa80-67d1-11eb-9625-9f49abc061b5.png)
+  ![image](https://user-images.githubusercontent.com/3717296/107054957-084caa80-67d1-11eb-9625-9f49abc061b5.png)
 
-Slides using **Markdown** or **AsciiDoc** and **Revealjs**
+- Slides using **Markdown** or **AsciiDoc** and **Revealjs**
 
-![image](https://user-images.githubusercontent.com/3717296/107055025-1d293e00-67d1-11eb-9b06-535d5501b7dd.png)
+  ![image](https://user-images.githubusercontent.com/3717296/107055025-1d293e00-67d1-11eb-9b06-535d5501b7dd.png)
 
-Codelab using **Markdown** or **AsciiDoc**
+- Codelab using **Markdown** or **AsciiDoc**
 
-![image](https://user-images.githubusercontent.com/3717296/107055091-35995880-67d1-11eb-80e4-895e7d77d2c3.png)
+  ![image](https://user-images.githubusercontent.com/3717296/107055091-35995880-67d1-11eb-80e4-895e7d77d2c3.png)
 
 ### Tips
 

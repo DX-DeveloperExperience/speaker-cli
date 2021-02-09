@@ -39,7 +39,7 @@
 		"ora": "^3.4.0",
 		"puppeteer": "^1.19.0",
 		"rimraf": "^2.6.3",
-		"semver": "^6.3.0"
+		"semver": "^7.0.0"
 	},
 	"engines": {
 		"node": ">=8.9"

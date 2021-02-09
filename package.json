@@ -27,7 +27,7 @@
 		"asciidoctor-reveal.js": "^2.0.0",
 		"chalk": "^2.4.2",
 		"chokidar": "^3.0.2",
-		"commander": "^2.20.0",
+		"commander": "^7.0.0",
 		"didyoumean": "^1.2.1",
 		"esm": "^3.2.25",
 		"fs-extra": "^8.1.0",

@@ -2,7 +2,7 @@ version: 2
 jobs:
   install-dependencies:
     docker:
-      - image: circleci/node:12
+      - image: circleci/node:12.22.7
     steps:
       - checkout
       - restore_cache:
@@ -20,7 +20,7 @@ jobs:
           paths: [node_modules]
   build:
     docker:
-      - image: circleci/node:12
+      - image: circleci/node:12.22.7
     steps:
       - setup_remote_docker
       - checkout
